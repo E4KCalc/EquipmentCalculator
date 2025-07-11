@@ -7,71 +7,89 @@ export const parts = [
     { key: "held", name: "Held" }
 ];
 
+
 export const STATS = {
     feldherr: {
-        left: [
+        kampfkraft_einheitenlimit: [
             { value: "nahkampfkraft", label: "Nahkampfkraft", max: 140 },
             { value: "fernkampfkraft", label: "Fernkampfkraft", max: 140 },
             { value: "innenhofkampfkraft", label: "Innenhofkampfkraft", max: 100 },
             { value: "einheitenlimitfront", label: "Einheitenlimit Front", max: 50 },
-            { value: "einheitenlimitflanke", label: "Einheitenlimit Flanke", max: 50 },
-            { value: "mauerschutz", label: "Mauerschutz", max: 160 },
-            { value: "torschutz", label: "Torschutz", max: 160 },
-            { value: "grabenschutz", label: "Grabenschutz", max: 120 },
-            { value: "reisegeschwindigkeit", label: "Reisetempo", max: 100, held: false, max_held: 40 },
-            { value: "beute", label: "Beutebonus", max: 100, held: false, max_held: 40 }
+            { value: "einheitenlimitflanke", label: "Einheitenlimit Flanke", max: 50 }
         ],
-        right: [
+        kampfkraft_einheitenlimit_vs_bh: [
             { value: "nahkampfkraft_vs_bh", label: "Nahkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
             { value: "fernkampfkraft_vs_bh", label: "Fernkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
             { value: "innenhofkampfkraft_vs_bh", label: "Innenhofkampfkraft gegen Burgherren", max: 60, held: true, max_held: 60 },
             { value: "einheitenlimitfront_vs_bh", label: "Einheitenlimit Front gegen Burgherren", max: 40, held: true, max_held: 40 },
-            { value: "einheitenlimitflanke_vs_bh", label: "Einheitenlimit Flanke gegen Burgherren", max: 40, held: true, max_held: 40 },
-            { value: "mauerschutz_vs_bh", label: "Mauerschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
-            { value: "torschutz_vs_bh", label: "Torschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
-            { value: "grabenschutz_vs_bh", label: "Grabenschutz gegen Burgherren", max: 30, held: true, max_held: 30 }
+            { value: "einheitenlimitflanke_vs_bh", label: "Einheitenlimit Flanke gegen Burgherren", max: 40, held: true, max_held: 40 }
+        ],
+        zusatzwerte: [
+            { value: "schildmaid", label: "Schildmaid-Unterstützung", max: 1050, artefaktOnly: true },
+            { value: "kampfkraft_angriff", label: "Kampfkraft beim Angriff", max: 20 },
+            { value: "kampfkraft_front", label: "Kampfkraft an der Front", max: 20 },
+            { value: "kampfkraft_flanke", label: "Kampfkraft an der Flanke", max: 20 }
         ],
         other: [
+            { value: "mauerschutz", label: "Mauerschutz", max: 160 },
+            { value: "torschutz", label: "Torschutz", max: 160 },
+            { value: "grabenschutz", label: "Grabenschutz", max: 120 },
+            { value: "reisegeschwindigkeit", label: "Reisetempo", max: 100, held: false, max_held: 40 },
+            { value: "beute", label: "Beutebonus", max: 100, held: false, max_held: 40 },
             { value: "kampfkraft_flanke", label: "Kampfkraft an den Flanken", max: 20 },
             { value: "kampfkraft_front", label: "Kampfkraft an der Front", max: 20 },
             { value: "kampfkraft_angriff", label: "Kampfkraft beim Angriff", max: 20 },
             { value: "schildmaid", label: "SchildmaidUnterstützung", max: 1050 }
+        ],
+        other_vs_bh: [
+            { value: "mauerschutz_vs_bh", label: "Mauerschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
+            { value: "torschutz_vs_bh", label: "Torschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
+            { value: "grabenschutz_vs_bh", label: "Grabenschutz gegen Burgherren", max: 30, held: true, max_held: 30 }
         ]
     },
     burgvogt: {
-        left: [
+        kampfkraft_einheitenlimit: [
             { value: "nahkampfkraft", label: "Nahkampfkraft", max: 140 },
             { value: "fernkampfkraft", label: "Fernkampfkraft", max: 140 },
-            { value: "innenhofkampfkraft", label: "Innenhof", max: 100 },
-            { value: "kampfkraft_flanke", label: "Kampfkraft an den Flanken", max: 20 },
-            { value: "kampfkraft_front", label: "Kampfkraft an der Front", max: 20 },
+            { value: "innenhofkampfkraft", label: "Innenhofkampfkraft", max: 100 },
+            { value: "einheitenlimitmauer", label: "Einheitenlimit auf der Mauer", max: 50 }
+        ],
+        kampfkraft_einheitenlimit_vs_bh: [
+            { value: "nahkampfkraft_vs_bh", label: "Nahkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
+            { value: "fernkampfkraft_vs_bh", label: "Fernkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
+            { value: "innenhofkampfkraft_vs_bh", label: "Innenhofkampfkraft gegen Burgherren", max: 60, held: true, max_held: 60 },
+            { value: "einheitenlimitmauer_vs_bh", label: "Einheitenlimit auf der Mauer gegen Burgherren", max: 40, held: true, max_held: 40 }
+        ],
+        zusatzwerte: [
+            { value: "beschuetzer_nordens", label: "Beschützer des Nordens", max: 1050, artefaktOnly: true },
+            { value: "kampfkraft_hauptburg", label: "Kampfkraft Hauptburg/Außenposten/Landmarke", max: 20 },
+            { value: "kampfkraft_verteidiger", label: "Kampfkraft für Verteidigungseinheiten", max: 20 },
+            { value: "kampfkraft_front_verteidigung", label: "Kampfkraft beim Verteidigen der Front", max: 20 },
+            { value: "kampfkraft_flanke_verteidigung", label: "Kampfkraft beim Verteidigen der Flanken", max: 20 }
+        ],
+        other: [
             { value: "mauerschutz", label: "Mauerschutz", max: 160 },
             { value: "torschutz", label: "Torschutz", max: 160 },
             { value: "grabenschutz", label: "Grabenschutz", max: 120 },
-            { value: "kampfkraft_verteidigung", label: "Kampfkraft für Verteidiger", max: 20 },
-            { value: "einheitenlimitmauer", label: "Einheitenlimit auf der Mauer", max: 50 },
-            { value: "beschuetzer_nordens", label: "Beschützer des Nordens", max: 1050 },
-            { value: "angriffswarnung", label: "frühere Angriffswarnung", max: 100 }
+            { value: "angriffswarnung_vs_bh", label: "Frühere Angriffswarnung gegen Burgherren", max: 90 }
         ],
-        right: [
-            { value: "nahkampfkraft_vs_bh", label: "Nahkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
-            { value: "fernkampfkraft_vs_bh", label: "Fernkampfkraft gegen Burgherren", max: 50, held: true, max_held: 50 },
-            { value: "innenhofkampfkraft_vs_bh", label: "Innenhof gegen Burgherren", max: 60, held: true, max_held: 60 },
-            { value: "einheitenlimitmauer_vs_bh", label: "Einheitenlimit auf der Mauer gegen Burgherren", max: 40, held: true, max_held: 40 },
+        other_vs_bh: [
             { value: "mauerschutz_vs_bh", label: "Mauerschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
             { value: "torschutz_vs_bh", label: "Torschutz gegen Burgherren", max: 60, held: true, max_held: 60 },
-            { value: "grabenschutz_vs_bh", label: "Grabenschutz gegen Burgherren", max: 30, held: true, max_held: 30 },
-            { value: "angriffswarnung_vs_bh", label: "frühere Angriffswarnung gegen Burgherren", max: 90, held: true, max_held: 90 }
-        ],
-        other: [
-            // Burgvogt-Helden-Extras siehe unten!
+            { value: "grabenschutz_vs_bh", label: "Grabenschutz gegen Burgherren", max: 30, held: true, max_held: 30 }
         ]
     }
 };
 
+// Helfer zum Zusammenführen aller Stats für aktuelle Modi (wird von der UI benötigt!)
 export function getAllStats(mode) {
-    // Kombiniert left, right und other
-    return [].concat(STATS[mode].left, STATS[mode].right, STATS[mode].other);
+    const m = STATS[mode];
+    return [].concat(
+        m.kampfkraft_einheitenlimit || [],
+        m.kampfkraft_einheitenlimit_vs_bh || [],
+        m.other || [],
+        m.other_vs_bh || []
+    );
 }
 
 export function getHeroExtraStats(mode) {

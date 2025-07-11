@@ -6,20 +6,25 @@ let relevantStats = getAllStats(currentMode).map(stat => true);
 
 let equipmentSetup = null;
 
+
+
 function getActiveStatOptions() {
     const allStats = getAllStats(currentMode);
     return allStats.filter((stat, i) => relevantStats[i]);
 }
+
+
+
 
 export function renderAppRoot() {
     const root = document.getElementById("app-root");
     root.innerHTML = `
         <div class="accordion-box">
             <div class="accordion-header" id="accordion-toggle">
-                <span class="stat-selector-title">Filter Stats</span>
+                <span class="stat-selector-title">Angezeigte Werte</span>
                 <span class="accordion-arrow" id="accordion-arrow">&#9654;</span>
             </div>
-            <div id="relevant-stats-accordion" class="accordion-content">
+            <div id="relevant-stats-accordion" class="accordion-content" style="height:0; display:none;">
                 <div id="relevant-stats-box"></div>
             </div>
         </div>
@@ -30,24 +35,57 @@ export function renderAppRoot() {
     setupEquipmentEvents();
     updateResults();
 
-    // Akkordeon Funktionalität
+    // Akkordeon Funktionalität mit sanfter Animation
     const accordionHeader = document.getElementById("accordion-toggle");
     const accordionContent = document.getElementById("relevant-stats-accordion");
     const accordionArrow = document.getElementById("accordion-arrow");
     let accordionOpen = false;
-    accordionContent.style.display = "none";
-    accordionArrow.style.transform = "rotate(0deg)";
+
     accordionHeader.addEventListener("click", () => {
         accordionOpen = !accordionOpen;
         if (accordionOpen) {
             accordionContent.style.display = "block";
+            let height = accordionContent.scrollHeight + "px";
+            accordionContent.style.height = "0";
+            // Neu:
+            accordionContent.classList.add("open");
+            requestAnimationFrame(() => {
+                accordionContent.style.height = height;
+            });
             accordionArrow.style.transform = "rotate(90deg)";
         } else {
-            accordionContent.style.display = "none";
+            accordionContent.style.height = accordionContent.scrollHeight + "px";
+            requestAnimationFrame(() => {
+                accordionContent.style.height = "0";
+            });
             accordionArrow.style.transform = "rotate(0deg)";
+            // Nach der Animation: open entfernen & display:none
+            accordionContent.addEventListener("transitionend", function handler() {
+                accordionContent.style.display = "none";
+                accordionContent.classList.remove("open");
+                accordionContent.removeEventListener("transitionend", handler);
+            });
         }
     });
+
+    // Dark Mode Umschalter Event
+    const darkToggle = document.getElementById("toggle-dark-mode");
+    if(darkToggle) {
+        darkToggle.addEventListener("click", () => {
+            document.body.classList.toggle("dark-mode");
+            // Text des Buttons wechseln
+            if(document.body.classList.contains("dark-mode")) {
+                darkToggle.textContent = "☀️ Light Mode";
+            } else {
+                darkToggle.textContent = "🌙 Dark Mode";
+            }
+        });
+    }
 }
+
+
+
+
 
 export function setupNavbarEvents() {
     document.getElementById("nav-feldherr").addEventListener("click", () => {
@@ -70,6 +108,10 @@ export function setupNavbarEvents() {
     });
 }
 
+
+
+
+
 function renderRelevantStatsBox() {
     const box = document.getElementById("relevant-stats-box");
     const allStats = getAllStats(currentMode);
@@ -88,6 +130,10 @@ function renderRelevantStatsBox() {
         });
     });
 }
+
+
+
+
 
 // Rendert alle Ausrüstungs-Boxen, die Summary-Box und die Ergebnis-Boxen
 function renderEquipmentGrid() {
@@ -112,6 +158,10 @@ function renderEquipmentGrid() {
     grid.innerHTML = html;
 }
 
+
+
+
+
 // Einzelne Ausrüstung (ohne eigene .equipment-part drumherum!)
 function renderEquipmentPart(part) {
     let statsHtml = '';
@@ -120,6 +170,7 @@ function renderEquipmentPart(part) {
     let isHeld = part.key === "held";
     let allowed;
     if (isHeld) {
+        // wie bisher
         if (currentMode === "feldherr") {
             allowed = allStats.filter(opt =>
                 (opt.held === true) ||
@@ -136,10 +187,11 @@ function renderEquipmentPart(part) {
             (!opt.value.endsWith("_vs_bh") && (!opt.held || opt.held === undefined || opt.held === false || opt.value === "beute" || opt.value === "reisegeschwindigkeit"))
         );
     }
+
     for (let i = 1; i <= 4; i++) {
         statsHtml += `
             <div>
-                ${createDropdown(`${part.key}-stat${i}`, allowed)}
+                ${createGroupedDropdown(`${part.key}-stat${i}`, currentMode, "", part.key, false)}
                 <input type="number" name="${part.key}-value${i}" class="stat-value" placeholder="%" min="0" style="width:54px;">
             </div>
         `;
@@ -151,29 +203,31 @@ function renderEquipmentPart(part) {
         for (let i = 1; i <= 4; i++) {
             gemStatsHtml += `
                 <div>
-                    ${createDropdown(`${part.key}-gem-stat${i}`, allStats)}
+                    ${createGroupedDropdown(`${part.key}-gem-stat${i}`, currentMode, "", part.key, true)}
                     <input type="number" name="${part.key}-gem-value${i}" class="stat-value" placeholder="%" min="0" style="width:54px;">
                 </div>
             `;
         }
         gemBlock = `
             <div class="gem-block">
-                <h5>Edelstein</h5>
-                <div class="gem-stats">
+                <div class="gem-header" style="cursor:pointer; user-select:none; display:flex; align-items:center; justify-content:space-between; padding: 6px 10px; font-weight:600; color:#2eb4ad; border-radius: 10px;">
+                    <span>Edelstein</span>
+                    <span class="gem-arrow" style="transition: transform 0.3s;">&#9654;</span>
+                </div>
+                <div class="gem-stats open" style="overflow:hidden; height:auto;">
                     ${gemStatsHtml}
                 </div>
             </div>
         `;
     }
 
-    // HELD-Extra-Felder als Dropdowns
     let extraFields = "";
     if (isHeld) {
         const heroExtraStats = getHeroExtraStats(currentMode);
         for (let i = 1; i <= 2; i++) {
             extraFields += `
                 <div>
-                    ${createDropdown(`held-extra-stat${i}`, heroExtraStats)}
+                    ${createGroupedDropdown(`held-extra-stat${i}`, currentMode, "", part.key, false)}
                     <input type="number" name="held-extra-value${i}" class="stat-value" placeholder="%" min="0" style="width:54px;">
                 </div>
             `;
@@ -181,7 +235,7 @@ function renderEquipmentPart(part) {
         if (extraFields) {
             extraFields = `
                 <div class="held-extra">
-                    <h5>Extra Effekte</h5>
+                    <h5>Extra Werte (Held)</h5>
                     <div class="held-extra-fields">
                         ${extraFields}
                     </div>
@@ -191,7 +245,12 @@ function renderEquipmentPart(part) {
 
     return `
         <div class="equipment-part">
-            <h4>${part.name}</h4>
+            <div class="equipment-part-header">
+                <h4>${part.name}</h4>
+                <button class="reset-btn" type="button" title="Zurücksetzen" data-reset="${part.key}">
+                    <span class="reset-icon">&#8635;</span>
+                </button>
+            </div>
             <div class="stats">
                 ${statsHtml}
             </div>
@@ -201,17 +260,123 @@ function renderEquipmentPart(part) {
     `;
 }
 
-function createDropdown(name, options) {
-    return `<select name="${name}" class="stat-type">
+
+
+
+
+// Diese Funktion wird komplett ersetzt!
+export function createGroupedDropdown(name, mode, selectedValue = "", partKey = "", isGem = false) {
+    // Definierte Reihenfolge und Labels der Gruppen
+    const groupOrder = [
+        { key: "kampfkraft_einheitenlimit", label: "Kampfkraft & Einheitenlimit" },
+        { key: "kampfkraft_einheitenlimit_vs_bh", label: "Kampfkraft & Einheitenlimit gegen Burgherren" },
+        { key: "zusatzwerte", label: "Zusatzwerte" },
+        { key: "other", label: "Sonstige Werte" },
+        { key: "other_vs_bh", label: "Sonstige Werte gegen Burgherren" }
+    ];
+    // Stats für den aktuellen Modus holen
+    const statGroups = groupOrder.map(g => {
+        let opts = (STATS[mode][g.key] || []);
+        // Zusatzwerte NUR für Artefakt und NICHT bei Edelsteinfeldern:
+        if (g.key === "zusatzwerte" && partKey) {
+            if (partKey !== "artefakt" || isGem) {
+                opts = opts.filter(opt => !opt.artefaktOnly);
+            }
+        }
+        return {
+            label: g.label,
+            options: opts
+        };
+    });
+
+    // HTML-Select aufbauen
+    return `
+    <select name="${name}" class="stat-type">
         <option value="">Wert wählen…</option>
-        ${options.map(opt => `<option value="${opt.value}">${opt.label}</option>`).join("")}
-    </select>`;
+        ${statGroups.map(group =>
+            group.options.length
+                ? `<optgroup label="${group.label}">
+                    ${group.options.map(opt =>
+                        `<option value="${opt.value}"${selectedValue === opt.value ? " selected" : ""}>${opt.label}${opt.max ? ` (max ${opt.max})` : ""}</option>`
+                    ).join("")}
+                </optgroup>`
+                : ""
+        ).join("")}
+    </select>
+    `;
 }
+
+
+
+
 
 function setupEquipmentEvents() {
     const grid = document.getElementById("equipment-grid");
     grid.addEventListener("input", handleEquipmentInput);
+
+    // Akkordeon für Edelstein
+    grid.querySelectorAll(".gem-header").forEach(header => {
+        const gemStats = header.nextElementSibling;
+        const arrow = header.querySelector(".gem-arrow");
+        // Standardmäßig geöffnet:
+        gemStats.classList.add("open");
+        gemStats.style.height = "auto";
+        arrow.style.transform = "rotate(90deg)";
+
+        header.addEventListener("click", () => {
+            const isOpen = gemStats.classList.contains("open");
+
+            if (isOpen) {
+                // Schließen
+                gemStats.style.height = gemStats.scrollHeight + "px";
+                gemStats.classList.remove("open");
+                requestAnimationFrame(() => {
+                    gemStats.style.height = "0";
+                });
+                arrow.style.transform = "rotate(0deg)";
+                gemStats.addEventListener("transitionend", function handler() {
+                    gemStats.style.height = "0";
+                    gemStats.removeEventListener("transitionend", handler);
+                });
+            } else {
+                // Öffnen
+                gemStats.style.display = "block";
+                gemStats.style.height = "0";
+                requestAnimationFrame(() => {
+                    gemStats.style.height = gemStats.scrollHeight + "px";
+                });
+                arrow.style.transform = "rotate(90deg)";
+                gemStats.addEventListener("transitionend", function handler() {
+                    gemStats.classList.add("open");
+                    gemStats.style.height = "auto";
+                    gemStats.removeEventListener("transitionend", handler);
+                });
+            }
+        });
+    });
+
+    // Reset-Button für jede Equipment-Box
+    grid.querySelectorAll(".reset-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const partKey = btn.getAttribute("data-reset");
+            // Alle Inputs in der entsprechenden Box leeren:
+            const box = btn.closest('.equipment-part');
+            if (!box) return;
+            box.querySelectorAll("input[type='number'], select").forEach(input => {
+                if (input.type === "number") {
+                    input.value = "";
+                } else if (input.tagName === "SELECT") {
+                    input.selectedIndex = 0;
+                }
+            });
+            handleEquipmentInput(); // Alles neu berechnen
+        });
+    });
 }
+
+
+
+
 
 function handleEquipmentInput() {
     parts.forEach(part => {
@@ -246,13 +411,43 @@ function handleEquipmentInput() {
             equipmentSetup[part.key].setGem(gemStatsArr.length ? new Gem(gemStatsArr) : null);
         }
     });
+    showInputSuccessFeedback(event.target);
     updateResults();
+    updateFieldHighlighting();
 }
+
+
+
+
+function updateFieldHighlighting() {
+    document.querySelectorAll('.stat-type').forEach(sel => {
+        if (sel.value && sel.value !== "") sel.classList.add('has-value');
+        else sel.classList.remove('has-value');
+    });
+    document.querySelectorAll('.stat-value').forEach(inp => {
+        if (inp.value && inp.value !== "") inp.classList.add('has-value');
+        else inp.classList.remove('has-value');
+    });
+}
+
+
+
+
+function showInputSuccessFeedback(inputEl) {
+    if (!inputEl) return;
+    inputEl.classList.add("input-success");
+    setTimeout(() => inputEl.classList.remove("input-success"), 500);
+}
+
+
+
+
 
 function updateResults() {
     const allStats = getAllStats(currentMode);
-    const leftStats = STATS[currentMode].left;
-    const rightStats = STATS[currentMode].right;
+    // ACHTUNG: Wenn die left/right-Gruppen aus STATS entfernt wurden, passe diesen Bereich ggf. an!
+    const leftStats = STATS[currentMode].kampfkraft_einheitenlimit || [];
+    const rightStats = STATS[currentMode].kampfkraft_einheitenlimit_vs_bh || [];
 
     const activeStats = allStats.filter((stat, i) => relevantStats[i]).map(stat => stat.value);
 
@@ -266,8 +461,8 @@ function updateResults() {
         }
     });
 
-    let htmlLeft = '<h3>Basis Ausrüstungswerte</h3>';
-    let htmlRight = '<h3>Gegen Burg­herren-Werte</h3>';
+    let htmlLeft = '<h3>Kampfkraft & Einheitenlimit</h3>';
+    let htmlRight = '<h3>Kampfkraft & Einheitenlimit vs BH</h3>';
 
     // Linke Spalte
     leftStats.forEach(stat => {
@@ -306,14 +501,17 @@ function updateResults() {
     updateSummaryResults(equipmentSetup);
 }
 
-function updateSummaryResults(equipmentSetup) {
+
+
+
+
+export function updateSummaryResults(equipmentSetup) {
     let html = `<h2>Summierte Gesamtwerte</h2>`;
     SUMMARY_STATS.forEach(stat => {
         let subDetails = [];
         let heldUsed = false;
         let onlyHeld = true;
 
-        // Clamping für Einzel-Substats
         let statSubSum = 0;
         let statSubSumHeld = 0;
 
@@ -347,7 +545,6 @@ function updateSummaryResults(equipmentSetup) {
         let percNoHeld = (statSubSum / maxNoHeld) * 100;
         let percTotal = (subSumTotal / (maxNoHeld + maxHeld)) * 100;
 
-        // Farblogik
         if (!onlyHeld && percNoHeld >= 98) color = "bg-green";
         else if (!onlyHeld && percNoHeld >= 85) color = "bg-yellow";
         if (heldUsed && percTotal >= 98) color = "bg-pink";
@@ -359,7 +556,7 @@ function updateSummaryResults(equipmentSetup) {
                 <span><b>${subSumTotal}</b> / ${stat.max !== null ? stat.max + " %" : "?"}</span>
                 <span class="accordion-arrow" id="sum-arrow-${stat.key}">&#9654;</span>
             </div>
-            <div class="summary-bar-body" id="sum-body-${stat.key}" style="display:none">
+            <div class="summary-bar-body" id="sum-body-${stat.key}" style="height:0; display:none; overflow:hidden;">
                 ${subDetails.filter(x=>x.value)
                     .map(x => `<div style="margin:3px 0 3px 15px; font-size:0.98em">${x.label}: <b>${x.value}${x.max ? " / " + x.max : ""}</b></div>`)
                     .join("")}
@@ -370,17 +567,39 @@ function updateSummaryResults(equipmentSetup) {
     let box = document.getElementById("summary-results");
     if (box) box.innerHTML = html;
 
-    // Akkordeon
+    // Akkordeons für Summary Bars mit sanfter Animation
     SUMMARY_STATS.forEach(stat => {
         const header = document.querySelector(`.summary-bar-head[data-accordion='${stat.key}']`);
         const body = document.getElementById(`sum-body-${stat.key}`);
         const arrow = document.getElementById(`sum-arrow-${stat.key}`);
         if (header && body && arrow) {
             header.onclick = () => {
-                const open = body.style.display === "block";
-                body.style.display = open ? "none" : "block";
-                arrow.style.transform = open ? "rotate(0deg)" : "rotate(90deg)";
-            }
+                const open = body.classList.contains("open");
+                if (open) {
+                    body.style.height = body.scrollHeight + "px";
+                    body.classList.remove("open");
+                    requestAnimationFrame(() => {
+                        body.style.height = "0";
+                    });
+                    arrow.style.transform = "rotate(0deg)";
+                    body.addEventListener("transitionend", function handler() {
+                        body.style.display = "none";
+                        body.removeEventListener("transitionend", handler);
+                    });
+                } else {
+                    body.style.display = "block";
+                    body.style.height = "0";
+                    requestAnimationFrame(() => {
+                        body.style.height = body.scrollHeight + "px";
+                    });
+                    arrow.style.transform = "rotate(90deg)";
+                    body.addEventListener("transitionend", function handler() {
+                        body.classList.add("open");
+                        body.style.height = "auto";
+                        body.removeEventListener("transitionend", handler);
+                    });
+                }
+            };
         }
     });
 }
